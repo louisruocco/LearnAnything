@@ -32,6 +32,7 @@ function Send-Email {
     $body = @"
     <h1>Learning Resources for $topic</h1>
     <p>Please find some learning resources that could be useful on $topic</p>
+    <h2>Videos</h2>
     <ul>
         $videos
     </ul>
