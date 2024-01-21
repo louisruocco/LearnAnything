@@ -3,7 +3,7 @@ function Find {
         [Parameter(Mandatory)]
         [string]$topic
     )
-    $apiKey = (Get-Content 'E:\Code\Learn Anything\utils\secrets.txt')[0]
+    $apiKey = Import-Clixml -Path .\utils\apikey.xml | ConvertFrom-SecureString -AsPlainText
     $endpoint = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=$topic&type=video&key=$apiKey"
     $res = Invoke-RestMethod $endpoint
     $items = $res.items
@@ -22,9 +22,11 @@ function Find {
 }
 
 function Send-Email {
-    $username = (Get-Content '.\utils\secrets.txt')[1]
-    $password = (Get-Content '.\utils\secrets.txt')[2] | ConvertTo-SecureString -AsPlainText -Force
-    $emailAddress = (Get-Content '.\utils\secrets.txt')[3]
+    $username = Import-Clixml -Path ".\utils\username.xml" | ConvertFrom-SecureString -AsPlainText
+    $emailAddress = Import-Clixml -Path ".\utils\emailAddress.xml" | ConvertFrom-SecureString -AsPlainText
+    $password =  Import-Clixml -Path ".\utils\password.xml"
+    $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $username, $password
+    $cred.UserName
     $videos = foreach($video in $results){
         "<li>$video</li>"
     }
@@ -40,16 +42,19 @@ function Send-Email {
 
 "@
     $email = @{
-        from = $username
+        from = $cred.UserName
         to = $emailAddress
         subject = "Search Results for $topic"
         smtpserver = "smtp.gmail.com"
         body = $body
         port = 587
-        credential = New-Object System.Management.Automation.PSCredential -ArgumentList $username, $password
+        credential = $cred
         usessl = $true
         verbose = $true
     }
 
     Send-MailMessage @email -BodyAsHtml
+
 }
+
+Find
