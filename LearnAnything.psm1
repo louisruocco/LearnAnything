@@ -3,7 +3,9 @@ function Find {
         [Parameter(Mandatory)]
         [string]$topic
     )
-    $apiKey = Import-Clixml -Path .\utils\apikey.xml | ConvertFrom-SecureString -AsPlainText
+    $path = resolve-path $PSScriptRoot\utils
+    Set-location $path
+    $apiKey = Import-Clixml -Path $PSScriptRoot\utils\apikey.xml | ConvertFrom-SecureString -AsPlainText
     $endpoint = "https://youtube.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=$topic&type=video&key=$apiKey"
     $res = Invoke-RestMethod $endpoint
     $items = $res.items
@@ -18,13 +20,9 @@ function Find {
         }
     }
 
-    Send-Email
-}
-
-function Send-Email {
-    $username = Import-Clixml -Path ".\utils\username.xml" | ConvertFrom-SecureString -AsPlainText
-    $emailAddress = Import-Clixml -Path ".\utils\emailAddress.xml" | ConvertFrom-SecureString -AsPlainText
-    $password =  Import-Clixml -Path ".\utils\password.xml"
+    $username = Import-Clixml -Path "$PSScriptRoot\utils\username.xml" | ConvertFrom-SecureString -AsPlainText
+    $emailAddress = Import-Clixml -Path "$PSScriptRoot\utils\emailAddress.xml" | ConvertFrom-SecureString -AsPlainText
+    $password =  Import-Clixml -Path "$PSScriptRoot\utils\password.xml"
     $cred = New-Object System.Management.Automation.PSCredential -ArgumentList $username, $password
     $cred.UserName
     $videos = foreach($video in $results){
@@ -54,7 +52,7 @@ function Send-Email {
     }
 
     Send-MailMessage @email -BodyAsHtml
-
 }
 
 Find
+
