@@ -1,2 +1,5 @@
-secrets.txt
+apikey.txt
+username.txt
+password.txt
+emailaddress.txt
 staging.ps1
